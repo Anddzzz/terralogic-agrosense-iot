@@ -1,32 +1,23 @@
-# language: es
-@EP-01 @US-F1
-Característica: Consulta de variables por parcela
-  Como agricultor
-  Quiero consultar la humedad, temperatura y radiación solar de cada parcela
-  Para conocer mis cultivos sin recorrerlos continuamente
+Feature: Consulta de variables por parcela
+  Como agricultor quiero consultar desde mi celular la humedad del suelo, la temperatura y la radiación solar de cada parcela para conocer las condiciones de mis cultivos sin tener que recorrerlas continuamente
 
-  Antecedentes:
-    Dado que el agricultor inició sesión
-    Y tiene la parcela "Parcela Norte" asociada
+  Scenario: Eydi ve la última lectura válida de su parcela
+    Given que la agricultora Eydi inició sesión desde su celular
+    And tiene asociada la parcela "Pomacocha"
+    And la última lectura válida es humedad 28 %, temperatura 12 °C y radiación 540 W/m² de hace 10 minutos
+    When abre el detalle de la parcela "Pomacocha"
+    Then el sistema muestra humedad "28 %", temperatura "12 °C" y radiación solar "540 W/m²"
+    And muestra la fecha y hora de la medición
+    And no muestra la etiqueta "Desactualizada"
 
-  @CA1 @normal
-  Escenario: Ver la última lectura válida
-    Dado que la última lectura válida es humedad 28 %, temperatura 19 °C y radiación 540 W/m², registrada hace 10 minutos
-    Cuando abre el detalle de "Parcela Norte"
-    Entonces el sistema muestra "28 %", "19 °C" y "540 W/m²"
-    Y muestra la fecha y hora de la medición
-    Y no muestra la etiqueta "Desactualizada"
+  Scenario: La última lectura no es reciente
+    Given que la última lectura válida de la parcela "Pomacocha" tiene 45 minutos de antigüedad
+    When Eydi abre el detalle de la parcela "Pomacocha"
+    Then el sistema muestra esa lectura con sus unidades y su fecha y hora de medición
+    And la identifica con la etiqueta "Desactualizada"
 
-  @CA2 @alterno
-  Escenario: Identificar una lectura desactualizada
-    Dado que la última lectura válida tiene 45 minutos de antigüedad
-    Cuando abre el detalle de "Parcela Norte"
-    Entonces el sistema muestra esa lectura con unidades y fecha/hora
-    Y la identifica con la etiqueta "Desactualizada"
-
-  @CA3 @excepcional
-  Escenario: Parcela sin lecturas válidas
-    Dado que "Parcela Norte" no tiene ninguna lectura válida
-    Cuando abre el detalle de "Parcela Norte"
-    Entonces el sistema muestra "Sin lectura disponible"
-    Y no muestra el valor "0" ni otro número en ninguna variable
+  Scenario: La parcela no tiene ninguna lectura válida
+    Given que la parcela "Pomacocha" no tiene ninguna lectura válida
+    When Eydi abre el detalle de la parcela "Pomacocha"
+    Then el sistema muestra el mensaje "Sin lectura disponible"
+    And no muestra el valor "0" ni otro valor numérico en ninguna variable
